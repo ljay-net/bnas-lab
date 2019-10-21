@@ -1,0 +1,5 @@
+{% for entry in asa_arp %}
+{% if entry["MAC"] is  defined %}
+{{ entry["ZONE"] }}    {{ entry["ADDRESS"] }}    {{ entry["MAC"] }}
+{% endif %}
+{% endfor %}

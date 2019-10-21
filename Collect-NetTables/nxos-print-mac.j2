@@ -1,0 +1,4 @@
+{% set mac = nxos_mac.stdout[0].TABLE_mac_address.ROW_mac_address %}
+{% for entry in mac %}
+{{ entry["disp_mac_addr"] }}    {{ entry["disp_vlan"] }}    {{ entry["disp_port"] }}
+{% endfor %}

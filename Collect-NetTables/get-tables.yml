@@ -1,0 +1,81 @@
+---
+- name: Create folder and get timestamp
+  hosts: localhost
+  gather_facts: no
+  run_once: True
+  tasks:
+  - file: path=results state=absent
+  - file: path=results state=directory
+  - command: date +%Y%m%d
+    register: timestamp
+  - set_fact: time={{ timestamp.stdout_lines[0] }}
+
+- name: Get ARP and MAC tables (IOS)
+  hosts: ios
+  gather_facts: no
+  vars:
+    ansible_command_timeout: 30
+
+  tasks:
+    - ios_command:
+        commands: show mac address-table
+      register: show_mac
+
+    - set_fact:
+        ios_mac: "{{ show_mac.stdout[0] | parse_cli_textfsm('templates/cisco_ios_show_mac-address-table.template') }}"
+
+    - ios_command:
+        commands: show ip arp
+      register: show_arp
+    
+    - set_fact:
+        ios_arp: "{{ show_arp.stdout[0] | parse_cli_textfsm('templates/cisco_ios_show_ip_arp.template') }}"  
+
+    - template:
+        src: ios-print-mac.j2
+        dest: "results/{{ inventory_hostname }}_mac-table_{{ hostvars['localhost']['time'] }}.txt"
+
+    - template:
+        src: ios-print-arp.j2
+        dest: "results/{{ inventory_hostname }}_arp-table_{{ hostvars['localhost']['time'] }}.txt"
+
+    # - copy:
+    #     content: "{{ ios_arp }}"
+    #     dest: "results/{{ inventory_hostname }}_arp-table_{{ hostvars['localhost']['time'] }}.txt"
+
+- name: Get ARP and MAC tables (NXOS)
+  hosts: nxos
+  gather_facts: no
+
+  tasks:
+    - nxos_command:
+        commands: show mac address-table | json
+      register: nxos_mac
+
+    - nxos_command:
+        commands: show ip arp | json
+      register: nxos_arp
+
+    - template:
+        src: nxos-print-mac.j2
+        dest: "results/{{ inventory_hostname }}_mac-table_{{ hostvars['localhost']['time'] }}.txt"
+
+    - template:
+        src: nxos-print-arp.j2
+        dest: "results/{{ inventory_hostname }}_arp-table_{{ hostvars['localhost']['time'] }}.txt"
+
+- name: Get ARP table (ASA)
+  hosts: asa
+  gather_facts: no
+
+  tasks:
+    - asa_command:
+        commands: show arp
+      register: asa_arp
+
+    - set_fact:
+        asa_arp: "{{ asa_arp.stdout[0] | parse_cli_textfsm('templates/cisco_asa_show_arp.template') }}"  
+
+    - template:
+        src: asa-print-arp.j2
+        dest: "results/{{ inventory_hostname }}_arp-table_{{ hostvars['localhost']['time'] }}.txt"

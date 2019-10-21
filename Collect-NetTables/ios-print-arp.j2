@@ -1,0 +1,5 @@
+{% for entry in ios_arp %}
+{% if entry["INTERFACE"] is  defined %}
+{{ entry["INTERFACE"] }}    {{ entry["ADDRESS"] }}    {{ entry["MAC"] }}
+{% endif %}
+{% endfor %}

@@ -1,0 +1,7 @@
+{% set data = nxos_arp.stdout[0].TABLE_vrf.ROW_vrf.TABLE_adj.ROW_adj %}
+{% set arp = [ data ] if data.mac is defined else data %}
+{% for entry in arp %}
+{% if entry.mac is  defined %}
+{{ entry["intf-out"] }}    {{ entry["ip-addr-out"] }}    {{ entry.mac }}
+{% endif %}
+{% endfor %}

@@ -6,9 +6,9 @@ interface Vlan{{ vlan_id }}
   ip access-group INBOUND-FROM-CUST-NETWORKS in
   no shutdown
   no ip redirects
-  ip address {{ subnet | ipaddr('SVI_oct') }}/28
+  ip address {{ subnet | ipaddr('SVI') }}/28
   no ipv6 redirects
   hsrp 0
    preemt
-   priority {{ SVI_oct is even | ternary('200','100') }}
+   priority {{ SVI is even | ternary('200','100') }}
    ip {{ subnet | ipaddr('1') }}r

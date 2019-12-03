@@ -1,16 +1,15 @@
 # Automated Provisioning customer service
 
-This folder contains data model to provision infrustructure services for customer deployment. Services includes vlan/svi on switches and vm related objects and nat/acl rules on firewall. Each customer might have one or multiple datacenters and multiple vm objects in each.
+This folder contains data model to provision infrustructure services for customer deployment in legacy portion of the network. Services includes vlan/svi on switches and vm related objects and nat/acl rules on firewall. Each customer might have one or multiple datacenters and multiple vm objects in each.
 
 ## Automating the following tasks:
 * Nexus: creation of customer Vlan
 * Nexus: creation of SVI's with HSRP configuration
-* Nexus: update of ACL if multiple datacenters 
 * ASA: creation of objects for every vm
 * ASA: creation of NAT and security rules 
 
 ## Roadmap
-* Automate VMware: distrubuted_port_groups, folders, etc.
+* Nexus: update of ACL if multiple datacenters connected over backend
 
 ## Define Ansible Inventory file like this
 ```yaml

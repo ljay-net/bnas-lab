@@ -1,0 +1,22 @@
+---
+customer_name: 'EXAMPLE'
+vlan_id: 100
+datacenters:
+  - dc_name: dc1
+    subnet: 10.1.100.0/28
+    vms:
+      - name: db-vip
+        private: 10.1.100.4
+        public: 198.51.100.4
+      - name: db-01
+        private: 10.1.100.5
+        public: 198.51.100.5
+      - name: db-02
+        private: 10.1.100.6
+        public: 198.51.100.6
+  - dc_name: dc2
+    subnet: 10.2.100.0/28
+    vms:
+      - name: db
+        private: 10.2.100.5
+        public: 203.0.113.5

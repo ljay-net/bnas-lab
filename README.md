@@ -1,76 +1,21 @@
-# Automated Provisioning customer service
+# bnas-lab
 
-This folder contains playbook to provision infrustructure services for customer deployment. Services includes vlan/svi on switches and vm related objects and nat/acl rules on firewall.
-Each customer might have one or multiple datacenters and multiple vm objects in each.
+This repository contains lab topology and varios files used in lab exersises of [Building Network Automation Solution course](https://my.ipspace.net/bin/list?id=NetAutSol)
 
-## Automating the following tasks
+### Ansible host setup:
+- Primary host to run tasks is VM with ansible and other installed tools
+- Same tools are available on local machine and would be run in python virtual enviroment 
 
-* Nexus: creation of customer Vlan
-* Nexus: creation of SVI's with HSRP configuration
-* Nexus: update of ACL if multiple datacenters
-* ASA: creation of objects for every vm
-* ASA: creation of NAT and security rules
+### Topology LAB setup:
+- Cisco VIRL is platform for building test labs
+- VIRL instance is running on ESXi cluster and available at ***virl.eng.company.local***
+- VIRL VM has 2 shared flat networks routeble to physical network
 
-## Roadmap
-
-* Automate VMware: distrubuted_port_groups, folders, etc.
-* Automate IPAM provisioning
-
-## How to run this
-
-* Fill customer.yml according to the template
-* Generate group variables by running this: ```ansible-playbook generate-group-vars.yml```
-* Run main playbook against inventory file: ```ansible-playbook -i <inventory>  main.yml```
-
-## Define Ansible Inventory file like this
-
-```yaml
-all:
-# these defaults can be overridden for any group in the [group:vars] section
-    vars:
-        ansible_connection: network_cli
-        connection: network_cli
-        ansible_ssh_user: admin
-        ansible_ssh_pass: !vault
-    children:
-        dc1:
-            children:
-                dc1-nxos:
-                    hosts:
-                        dc1-core1:
-                            ansible_host: 10.10.10.2
-                            SVI: 2
-                        dc1-core2:
-                            ansible_host: 10.10.10.3
-                            SVI: 3
-                dc1-asa:
-                    hosts:
-                        dc1-efw1:
-                            ansible_host: 10.10.11.1
-        dc2:
-            children:
-                dc2-nxos:
-                    hosts:
-                        dc2-core1:
-                            ansible_host: 10.20.10.2
-                            SVI: 2
-                        dc2-core2:
-                            ansible_host: 10.20.10.3
-                            SVI: 3
-                dc2-asa:
-                    hosts:
-                        dc1-efw1:
-                            ansible_host: 10.20.11.1
-        nxos:
-            children:
-                dc1-nxos:
-                dc2-nxos:
-            vars:
-                ansible_network_os: nxos
-        asa:
-            children:
-                dc1-asa:
-                dc2-asa:
-            vars:
-                ansible_network_os: asa
-```
+### Test topology 
+- Basic topology has several devices representing various network os's needed for automation tasks:
+  - IOS for routers and L2 switches
+  - NX-OS for distribution and core 
+  - ASA for firewalls
+- VIRL flat network is used as OOB to connect to those devices
+- As a first step, for simple tests, topology looks like: `S1-r1 - S1-sw1 - S1-fw1` with flat as OOB 
+- Topology can be extended as needed by adding more devices in VIRL or adding physical by interconnecting via flat1

@@ -1,0 +1,31 @@
+---
+- name: Load customer variables and generate group vars
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Clean existing group vars
+      file:
+        state: absent
+        path: "group_vars/"
+        
+    - name: Create group_var folder if doesn't exist
+      file:
+        state: directory
+        path: "group_vars/"
+
+    - name: "Load customer variables"
+      include_vars: 
+        file: "customer.yml" 
+        name: customer
+    
+    - name: "Copy common variables"
+      template:
+        src: templates/all-vars.j2
+        dest: "group_vars/all.yml"
+
+    - name: "Loop through datacenters and write to group files"
+      copy:
+        content: |
+          {{ item|to_nice_yaml(indent=2) }}
+        dest: "group_vars/{{ item.dc_name }}.yml"
+      with_items: "{{ customer.datacenters }}"

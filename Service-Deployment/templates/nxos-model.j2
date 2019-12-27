@@ -1,0 +1,14 @@
+vlan {{ vlan_id }}
+  name CUST-{{ subnet }}
+interface Vlan{{ vlan_id }}
+  description S_CUST-VLAN{{ vlan_id }} Interface
+  no shutdown
+  ip access-group INBOUND-FROM-CUST-NETWORKS in
+  no ip redirects
+  ip address {{ subnet | ipaddr(SVI) }}
+  ip router eigrp 100
+  hsrp version 2
+  hsrp 0
+    preempt
+    priority {{ SVI is even | ternary('200','150') }}
+    ip {{ subnet | ipaddr('next_usable') }}

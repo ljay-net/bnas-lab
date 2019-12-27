@@ -1,0 +1,53 @@
+---
+- name: Prepare temporary folder
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Remove old configs
+      file: path="{{temp_configs}}/" state=absent
+      check_mode: no
+    - name: Create placeholder for building configs
+      file: path="{{temp_configs}}/" state=directory
+      check_mode: no
+
+- name: Generate and update Nexus configs
+  hosts: nxos
+  gather_facts: no
+  tasks:
+    - name: Generate temp configs from template
+      template:
+        src: templates/nxos-model.j2
+        dest: "{{temp_configs}}/{{ inventory_hostname }}.cfg"
+      when: dc_name is defined
+      delegate_to: localhost
+      changed_when: false
+      check_mode: no
+    - name: Push configs to devices
+      nxos_config:
+        src: "{{ temp_configs }}/{{ inventory_hostname }}.cfg"
+        save_when: changed
+      when: dc_name is defined
+
+- name: Generate and update ASA configs
+  hosts: asa
+  gather_facts: no
+  tasks:
+    - name: Generate temp configs from template
+      template:
+        src: templates/asa-model.j2
+        dest: "{{ temp_configs }}/{{ inventory_hostname }}.cfg"
+      when: dc_name is defined
+      delegate_to: localhost
+      changed_when: false
+      check_mode: no
+    - name: Push configs to devices
+      asa_config:
+        src: "{{ temp_configs }}/{{ inventory_hostname }}.cfg"
+      notify: "save config asa"
+      when: dc_name is defined
+  handlers:
+    - name: save config asa
+      asa_command:
+        commands: "write memory"
+        timeout: 60
+      when: dc_name is defined

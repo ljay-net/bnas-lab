@@ -1,0 +1,21 @@
+{% for vm in vms %}
+object network host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{ customer_name }}-{{vm.name}}
+ host {{ vm.private }}
+ description {{ customer_name }}-{{ vm.name }}
+object network ext-{{ dc_name }}-{{ vm.public }}
+ host {{ vm.public }}
+ description SNAT > {{ vm.private }} {{customer_name}}-{{vm.name}}
+object network host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}}
+ nat (any,outside) static ext-{{ dc_name }}-{{ vm.public }}
+{% endfor %}
+{% for vm in vms if "vip" in vm.name %}
+access-list outside_access_in extended permit icmp any object host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}} log disable
+access-list outside_access_in extended permit tcp any object host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}} eq www log disable
+access-list outside_access_in extended permit tcp any object host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}} eq https log disable
+{% endfor %}
+{% for vm in vms if "db" in vm.name and "vip" not in vm.name %}
+access-list outside_access_in extended permit icmp any object host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}} log disable
+access-list outside_access_in extended permit tcp any object host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}} eq www log disable
+access-list outside_access_in extended permit tcp any object host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}} eq https log disable
+access-list outside_access_in extended permit object 7705 any object host_{{ dc_name }}_cust-vlan{{ vlan_id }}_{{customer_name}}-{{vm.name}} log disable inactive
+{% endfor %}
